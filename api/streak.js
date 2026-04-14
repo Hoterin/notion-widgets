@@ -27,7 +27,7 @@ export default async function handler(req, res) {
 
     const rows = data.results.map(row => ({
       name: row.properties.Name?.title?.[0]?.plain_text ?? "NO NAME FOUND",
-      streak: row.properties.Streak?.number ?? "NO STREAK FOUND"
+      streak: row.properties["Streak (number only)"]?.number ?? "NO STREAK FOUND"
     }));
 
     res.status(200).json({ rows });
