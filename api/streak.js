@@ -25,10 +25,11 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-const firstRow = data.results[0];
-const propertyNames = Object.keys(firstRow.properties);
+const gymRow = data.results.find(row =>
+  row.properties.Name?.title?.[0]?.plain_text === "Gym"
+);
 
-res.status(200).json({ propertyNames });
+res.status(200).json({ streakProperty: gymRow.properties["Streak (number only)"] });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
