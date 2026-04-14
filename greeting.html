@@ -1,54 +1,54 @@
+
 <style>
   /* ============================================
      GREETING WIDGET — EDITABLE STYLES
-     Edit anything below to customize the look
   ============================================ */
 
-  /* --- Page background --- */
   body {
     margin: 0;
-    padding: 0px 24px;
+    padding: 20px 24px;
     background-color: rgb(25, 25, 25);
-    /* Change to match your Notion page color */
-    font-family: monospace;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
   }
 
-  /* --- Main greeting name --- */
   .greeting-name {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 600;
     color: #fff;
     margin: 0 0 4px 0;
     line-height: 1.2;
   }
 
-  /* --- Greeting prefix (Bom dia / Boa tarde / Boa noite) --- */
   .greeting-prefix {
     color: #CD4946;
-    /* Red accent — change freely */
   }
 
-  /* --- Date line below the greeting --- */
   .greeting-date {
-    font-size: 1rem;
+    font-size: 1.2rem;
     color: #888;
-    margin: 0 0 16px 0;
+    margin: 0;
     font-weight: 400;
-    grid-collumn: 1;
   }
 
-  /* --- Live clock --- */
   .greeting-clock {
     font-size: 3rem;
+    font-weight: 500;
     color: #aaa;
-    font-weight: 400;
     font-variant-numeric: tabular-nums;
-    grid-collumn: 2;
+    margin: 0;
+    line-height: 1.2;
   }
 
-  .greeting-title {
-    display: grid;
-    grid-template-collumns: 1fr auto;
+  .greeting-clock-label {
+    font-size: 11px;
+    color: #aaa;
+    text-align: right;
+    margin: 4px 0 0 0;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
   }
 
   /* ============================================
@@ -56,71 +56,38 @@
   ============================================ */
 </style>
 
-<div class="greeting-title">
+<div class="left">
   <p class="greeting-name">
     <span class="greeting-prefix" id="greeting-prefix">Bom dia</span>, Guilherme
   </p>
   <p class="greeting-date" id="greeting-date"></p>
-  <p class="greeting-clock" id="greeting-clock"></p>
 </div>
 
+<div class="right">
+  <p class="greeting-clock" id="greeting-clock"></p>
+  <p class="greeting-clock-label">Londrina, BR</p>
+</div>
 
 <script>
   /* ============================================
-     EDITABLE SETTINGS — change these values
+     EDITABLE SETTINGS
   ============================================ */
-  const NAME = "Guilherme";           // Your name
-  const LOCALE = "pt-BR";             // Language for date formatting
-  const TIMEZONE = "America/Sao_Paulo"; // Your timezone
-
-  const QUOTES = [
-    "A consistência bate o talento quando o talento não é consistente.",
-    "Foque no processo. Os resultados são apenas o feedback.",
-    "Cada linha de código é um passo mais perto da independência.",
-    "Disciplina é a ponte entre metas e conquistas.",
-    "O melhor momento para começar foi ontem. O segundo melhor é agora."
-  ];
+  const LOCALE = "pt-BR";
+  const TIMEZONE = "America/Sao_Paulo";
   /* ============================================
      END OF EDITABLE SETTINGS
   ============================================ */
 
   function getGreeting(hour) {
-    if (hour >= 5 && hour < 12) return "Bom dia";
+    if (hour >= 5 && hour < 12)  return "Bom dia";
     if (hour >= 12 && hour < 18) return "Boa tarde";
     return "Boa noite";
   }
 
-  function formatDate(now) {
-    return now.toLocaleDateString(LOCALE, {
-      timeZone: TIMEZONE,
-      weekday: "long",
-      day: "numeric",
-      month: "long",
-      year: "numeric"
-    });
-  }
-
-  function formatTime(now) {
-    return now.toLocaleTimeString(LOCALE, {
-      timeZone: TIMEZONE,
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit"
-    });
-  }
-
   function getHour(now) {
     return parseInt(now.toLocaleTimeString("en-US", {
-      timeZone: TIMEZONE,
-      hour: "numeric",
-      hour12: false
+      timeZone: TIMEZONE, hour: "numeric", hour12: false
     }), 10);
-  }
-
-  function pickQuote() {
-    const today = new Date().toDateString();
-    const index = today.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % QUOTES.length;
-    return QUOTES[index];
   }
 
   function update() {
@@ -128,11 +95,16 @@
     const hour = getHour(now);
 
     document.getElementById("greeting-prefix").textContent = getGreeting(hour);
-    document.getElementById("greeting-date").textContent = formatDate(now);
-    document.getElementById("greeting-clock").textContent = formatTime(now);
+
+    document.getElementById("greeting-date").textContent = now.toLocaleDateString(LOCALE, {
+      timeZone: TIMEZONE, weekday: "long", day: "numeric", month: "long", year: "numeric"
+    });
+
+    document.getElementById("greeting-clock").textContent = now.toLocaleTimeString(LOCALE, {
+      timeZone: TIMEZONE, hour: "2-digit", minute: "2-digit", second: "2-digit"
+    });
   }
 
-  document.getElementById("greeting-quote").textContent = pickQuote();
   update();
   setInterval(update, 1000);
 </script>
