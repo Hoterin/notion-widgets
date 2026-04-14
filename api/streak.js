@@ -25,12 +25,10 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    const rows = data.results.map(row => ({
-      name: row.properties.Name?.title?.[0]?.plain_text ?? "NO NAME FOUND",
-      streak: row.properties["Streak (number only)"]?.number ?? "NO STREAK FOUND"
-    }));
+const firstRow = data.results[0];
+const propertyNames = Object.keys(firstRow.properties);
 
-    res.status(200).json({ rows });
+res.status(200).json({ propertyNames });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
