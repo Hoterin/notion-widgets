@@ -25,11 +25,12 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-const gymRow = data.results.find(row =>
-  row.properties.Name?.title?.[0]?.plain_text === "Gym"
-);
+    const rows = data.results.map(row => ({
+      name: row.properties.Name?.title?.[0]?.plain_text ?? "NO NAME FOUND",
+      streak: row.properties.Streak?.number ?? "NO STREAK FOUND"
+    }));
 
-res.status(200).json({ streakProperty: gymRow.properties["Streak (number only)"] });
+    res.status(200).json({ rows });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
