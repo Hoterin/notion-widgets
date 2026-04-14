@@ -7,7 +7,7 @@
   /* --- Page background --- */
   body {
     margin: 0;
-    padding: 20px 24px;
+    padding: 0px 24px;
     background-color: rgb(25, 25, 25);
     /* Change to match your Notion page color */
     font-family: monospace;
@@ -30,34 +30,25 @@
 
   /* --- Date line below the greeting --- */
   .greeting-date {
-    font-size: 2rem;
+    font-size: 1rem;
     color: #888;
     margin: 0 0 16px 0;
     font-weight: 400;
-  }
-
-  /* --- Divider line --- */
-  .greeting-divider {
-    border: none;
-    border-top: 1px solid #ebebeb;
-    margin: 0 0 14px 0;
+    grid-collumn: 1;
   }
 
   /* --- Live clock --- */
   .greeting-clock {
-    font-size: 1.5rem;
+    font-size: 3rem;
     color: #aaa;
     font-weight: 400;
     font-variant-numeric: tabular-nums;
+    grid-collumn: 2;
   }
 
-  /* --- Motivational quote --- */
-  .greeting-quote {
-    font-size: 1.2rem;
-    color: #bbb;
-    font-style: italic;
-    margin: 10px 0 0 0;
-    line-height: 1.5;
+  .greeting-title {
+    display: grid;
+    grid-template-collumns: 1fr auto;
   }
 
   /* ============================================
@@ -65,13 +56,14 @@
   ============================================ */
 </style>
 
-<p class="greeting-name">
-  <span class="greeting-prefix" id="greeting-prefix">Bom dia</span>, Guilherme
-</p>
-<p class="greeting-date" id="greeting-date"></p>
-<hr class="greeting-divider">
-<p class="greeting-clock" id="greeting-clock"></p>
-<p class="greeting-quote" id="greeting-quote"></p>
+<div class="greeting-title">
+  <p class="greeting-name">
+    <span class="greeting-prefix" id="greeting-prefix">Bom dia</span>, Guilherme
+  </p>
+  <p class="greeting-date" id="greeting-date"></p>
+  <p class="greeting-clock" id="greeting-clock"></p>
+</div>
+
 
 <script>
   /* ============================================
