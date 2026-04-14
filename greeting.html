@@ -1,0 +1,146 @@
+<style>
+  /* ============================================
+     GREETING WIDGET — EDITABLE STYLES
+     Edit anything below to customize the look
+  ============================================ */
+
+  /* --- Page background --- */
+  body {
+    margin: 0;
+    padding: 20px 24px;
+    background-color: rgb(25, 25, 25);
+    /* Change to match your Notion page color */
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  }
+
+  /* --- Main greeting name --- */
+  .greeting-name {
+    font-size: 26px;
+    font-weight: 600;
+    color: #fff;
+    margin: 0 0 4px 0;
+    line-height: 1.2;
+  }
+
+  /* --- Greeting prefix (Bom dia / Boa tarde / Boa noite) --- */
+  .greeting-prefix {
+    color: #721718;
+    /* Red accent — change freely */
+  }
+
+  /* --- Date line below the greeting --- */
+  .greeting-date {
+    font-size: 13px;
+    color: #888;
+    margin: 0 0 16px 0;
+    font-weight: 400;
+  }
+
+  /* --- Divider line --- */
+  .greeting-divider {
+    border: none;
+    border-top: 1px solid #ebebeb;
+    margin: 0 0 14px 0;
+  }
+
+  /* --- Live clock --- */
+  .greeting-clock {
+    font-size: 13px;
+    color: #aaa;
+    font-weight: 400;
+    font-variant-numeric: tabular-nums;
+  }
+
+  /* --- Motivational quote --- */
+  .greeting-quote {
+    font-size: 12px;
+    color: #bbb;
+    font-style: italic;
+    margin: 10px 0 0 0;
+    line-height: 1.5;
+  }
+
+  /* ============================================
+     END OF EDITABLE STYLES
+  ============================================ */
+</style>
+
+<p class="greeting-name">
+  <span class="greeting-prefix" id="greeting-prefix">Bom dia</span>, Guilherme
+</p>
+<p class="greeting-date" id="greeting-date"></p>
+<hr class="greeting-divider">
+<p class="greeting-clock" id="greeting-clock"></p>
+<p class="greeting-quote" id="greeting-quote"></p>
+
+<script>
+  /* ============================================
+     EDITABLE SETTINGS — change these values
+  ============================================ */
+  const NAME = "Guilherme";           // Your name
+  const LOCALE = "pt-BR";             // Language for date formatting
+  const TIMEZONE = "America/Sao_Paulo"; // Your timezone
+
+  const QUOTES = [
+    "A consistência bate o talento quando o talento não é consistente.",
+    "Foque no processo. Os resultados são apenas o feedback.",
+    "Cada linha de código é um passo mais perto da independência.",
+    "Disciplina é a ponte entre metas e conquistas.",
+    "O melhor momento para começar foi ontem. O segundo melhor é agora."
+  ];
+  /* ============================================
+     END OF EDITABLE SETTINGS
+  ============================================ */
+
+  function getGreeting(hour) {
+    if (hour >= 5 && hour < 12) return "Bom dia";
+    if (hour >= 12 && hour < 18) return "Boa tarde";
+    return "Boa noite";
+  }
+
+  function formatDate(now) {
+    return now.toLocaleDateString(LOCALE, {
+      timeZone: TIMEZONE,
+      weekday: "long",
+      day: "numeric",
+      month: "long",
+      year: "numeric"
+    });
+  }
+
+  function formatTime(now) {
+    return now.toLocaleTimeString(LOCALE, {
+      timeZone: TIMEZONE,
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit"
+    });
+  }
+
+  function getHour(now) {
+    return parseInt(now.toLocaleTimeString("en-US", {
+      timeZone: TIMEZONE,
+      hour: "numeric",
+      hour12: false
+    }), 10);
+  }
+
+  function pickQuote() {
+    const today = new Date().toDateString();
+    const index = today.split("").reduce((acc, c) => acc + c.charCodeAt(0), 0) % QUOTES.length;
+    return QUOTES[index];
+  }
+
+  function update() {
+    const now = new Date();
+    const hour = getHour(now);
+
+    document.getElementById("greeting-prefix").textContent = getGreeting(hour);
+    document.getElementById("greeting-date").textContent = formatDate(now);
+    document.getElementById("greeting-clock").textContent = formatTime(now);
+  }
+
+  document.getElementById("greeting-quote").textContent = pickQuote();
+  update();
+  setInterval(update, 1000);
+</script>
