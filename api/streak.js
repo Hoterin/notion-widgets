@@ -3,6 +3,7 @@ export default async function handler(req, res) {
 
   const NOTION_KEY = process.env.NOTION_API_KEY;
   const DATABASE_ID = process.env.NOTION_DATABASE_ID;
+  const HABIT_NAME = "Gym";
 
   if (!NOTION_KEY) return res.status(500).json({ error: "Missing NOTION_API_KEY" });
   if (!DATABASE_ID) return res.status(500).json({ error: "Missing NOTION_DATABASE_ID" });
@@ -15,7 +16,12 @@ export default async function handler(req, res) {
         "Notion-Version": "2022-06-28",
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({})
+      body: JSON.stringify({
+        filter: {
+          property: "Name",
+          title: { equals: HABIT_NAME }
+        }
+      })
     });
 
     if (!response.ok) {
@@ -25,12 +31,12 @@ export default async function handler(req, res) {
 
     const data = await response.json();
 
-    const rows = data.results.map(row => ({
-      name: row.properties.Name?.title?.[0]?.plain_text ?? "NO NAME FOUND",
-      streak: row.properties["Streak (number only)"]?.formula?.number ?? "NO STREAK FOUND"
-    }));
+    if (!data.results || data.results.length === 0) {
+      return res.status(404).json({ error: "Habit not found" });
+    }
 
-    res.status(200).json({ rows });
+    const streak = data.results[0].properties["Streak (number only)"]?.formula?.number ?? 0;
+    res.status(200).json({ streak });
 
   } catch (err) {
     res.status(500).json({ error: err.message });
