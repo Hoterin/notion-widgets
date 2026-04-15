@@ -32,11 +32,16 @@
       font-variant-numeric: tabular-nums;
     }
 
+    #fire-icon {
+      width: 20px;
+    }
+
     .streak-unit {
       font-size: 14px;
       font-weight: 400;
       color: #aaa;
     }
+    
 
     .streak-sub {
       font-size: 12px;
@@ -57,6 +62,7 @@
 
   <p class="streak-value">
     <span id="streak-number">—</span>
+    <img src="./img/fire-icon.svg" alt="" id="fire-icon">
     <span class="streak-unit">days</span>
   </p>
   <p class="streak-sub" id="streak-sub">loading...</p>
@@ -84,6 +90,11 @@
               : "Time to get back in the gym.";
         } else {
           throw new Error("No streak value");
+        }
+        if (document.getElementById("streak-number").textContent === "0") {
+          document.getElementById("fire-icon").style.display = 'none'
+        } else {
+          document.getElementById("fire-icon").style.display = 'inline-block'
         }
       } catch (err) {
         document.getElementById("streak-number").textContent = "—";
