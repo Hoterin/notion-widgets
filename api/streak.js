@@ -14,13 +14,15 @@ export default async function handler(req, res) {
       headers: {
         "Authorization": `Bearer ${NOTION_KEY}`,
         "Notion-Version": "2022-06-28",
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        "Cache-Control": "no-cache"
       },
       body: JSON.stringify({
         filter: {
           property: "Name",
           title: { equals: HABIT_NAME }
-        }
+        },
+        page_size: 1
       })
     });
 
