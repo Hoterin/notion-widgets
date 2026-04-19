@@ -18,18 +18,10 @@
       gap: 16px;
     }
 
-    .flame-wrap {
-      flex-shrink: 0;
-      width: 36px;
-      height: 36px;
-      display: inline-block;
-      align-items: center;
-      justify-content: center;
-    }
-
-    .flame-wrap img {
+    #flame {
       width: 48px;
       height: 48px;
+      display: inline-block;
       transition: filter 0.4s ease;
     }
 
@@ -92,9 +84,7 @@
     <p class="streak-label">Gym streak</p>
     <p class="streak-value">
       <span id="streak-number">—</span>
-      <div class="flame-wrap">
-        <img id="flame" src="./img/fire-icon.svg" alt="flame" class="state-hidden" />
-      </div>
+      <img id="flame" src="./img/fire-icon.svg" alt="flame" class="state-hidden" />
       <span class="streak-unit">days</span>
     </p>
     <p class="streak-sub" id="streak-sub">loading...</p>
