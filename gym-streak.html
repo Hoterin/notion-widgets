@@ -11,9 +11,45 @@
 
     body {
       margin: 0;
-      background-color: #502c29;
-      font-family: monospace;
+      padding: 20px 24px;
+      background-color: #ffffff;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      display: flex;
+      align-items: center;
+      gap: 16px;
     }
+
+    .flame-wrap {
+      flex-shrink: 0;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .flame-wrap img {
+      width: 48px;
+      height: 48px;
+      transition: filter 0.4s ease;
+    }
+
+    /* Full color — trained today */
+    .flame-wrap img.state-done {
+      filter: none;
+    }
+
+    /* Black and white — not yet trained today */
+    .flame-wrap img.state-pending {
+      filter: grayscale(100%) opacity(50%);
+    }
+
+    /* Hidden — streak reset or rest day with no entry */
+    .flame-wrap img.state-hidden {
+      display: none;
+    }
+
+    .info {}
 
     .streak-label {
       font-size: 11px;
@@ -21,36 +57,29 @@
       color: #aaa;
       text-transform: uppercase;
       letter-spacing: 0.06em;
+      margin: 0 0 4px 0;
     }
 
     .streak-value {
       font-size: 36px;
       font-weight: 600;
-      color: #fff;
+      color: #1a1a1a;
       margin: 0;
       line-height: 1;
       font-variant-numeric: tabular-nums;
-    }
-
-    #fire-icon {
-      width: 20px;
     }
 
     .streak-unit {
       font-size: 14px;
       font-weight: 400;
       color: #aaa;
+      margin-left: 4px;
     }
-    
 
     .streak-sub {
       font-size: 12px;
       color: #bbb;
-    }
-
-    .streak-error {
-      font-size: 12px;
-      color: #e57373;
+      margin: 5px 0 0 0;
     }
 
     /* ============================================
@@ -60,19 +89,24 @@
 </head>
 <body>
 
-  <p class="streak-value">
-    <span id="streak-number">—</span>
-    <img src="./img/fire-icon.svg" alt="" id="fire-icon">
-    <span class="streak-unit">days</span>
-  </p>
-  <p class="streak-sub" id="streak-sub">loading...</p>
+  <div class="flame-wrap">
+    <img id="flame" src="./img/flame-icon.svg" alt="flame" class="state-hidden" />
+  </div>
+
+  <div class="info">
+    <p class="streak-label">Gym streak</p>
+    <p class="streak-value">
+      <span id="streak-number">—</span>
+      <span class="streak-unit">days</span>
+    </p>
+    <p class="streak-sub" id="streak-sub">loading...</p>
+  </div>
 
   <script>
     /* ============================================
        EDITABLE SETTINGS
     ============================================ */
     const API_URL = "https://notion-widgets-neon.vercel.app/api/streak";
-    // Replace with your actual Vercel URL after deploying
     /* ============================================
        END OF EDITABLE SETTINGS
     ============================================ */
@@ -82,28 +116,35 @@
         const res = await fetch(API_URL);
         const data = await res.json();
 
-        if (data.streak !== undefined) {
-          document.getElementById("streak-number").textContent = data.streak;
-          document.getElementById("streak-sub").textContent =
-            data.streak > 0
-              ? "Keep it going, don't break the chain."
-              : "Time to get back in the gym.";
-        } else {
-          throw new Error("No streak value");
+        const flame = document.getElementById("flame");
+        const number = document.getElementById("streak-number");
+        const sub = document.getElementById("streak-sub");
+
+        if (data.streak === undefined) throw new Error("No data");
+
+        number.textContent = data.streak;
+
+        if (data.todayStatus === "done") {
+          flame.className = "state-done";
+          sub.textContent = "Trained today. Keep the chain going.";
+        } else if (data.todayStatus === "pending") {
+          flame.className = "state-pending";
+          sub.textContent = "Not trained yet today.";
+        } else if (data.todayStatus === "rest") {
+          flame.className = "state-hidden";
+          sub.textContent = "Rest day today.";
         }
-        if (document.getElementById("streak-number").textContent === "0") {
-          document.getElementById("fire-icon").style.display = 'none'
-        } else {
-          document.getElementById("fire-icon").style.display = 'inline-block'
-        }
+
       } catch (err) {
         document.getElementById("streak-number").textContent = "—";
-        document.getElementById("streak-sub").className = "streak-error";
         document.getElementById("streak-sub").textContent = "Could not load streak.";
       }
     }
 
     loadStreak();
+
+    // Refresh every 5 minutes so it updates when you check the task
+    setInterval(loadStreak, 5 * 60 * 1000);
   </script>
 
 </body>
