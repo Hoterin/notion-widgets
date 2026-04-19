@@ -19,8 +19,8 @@
     }
 
     #flame {
-      width: 24px;
-      height: 24px;
+      width: 30px;
+      height: 30px;
       display: inline-block;
       transition: filter 0.4s ease;
     }
@@ -42,19 +42,10 @@
 
     .info {}
 
-    .streak-label {
-      font-size: 11px;
-      font-weight: 500;
-      color: #aaa;
-      text-transform: uppercase;
-      letter-spacing: 0.06em;
-      margin: 0 0 4px 0;
-    }
-
     .streak-value {
       font-size: 36px;
       font-weight: 600;
-      color: #1a1a1a;
+      color: #fff;
       margin: 0;
       line-height: 1;
       font-variant-numeric: tabular-nums;
@@ -81,7 +72,6 @@
 <body>
 
   <div class="info">
-    <p class="streak-label">Gym streak</p>
     <p class="streak-value">
       <span id="streak-number">—</span>
       <img id="flame" src="./img/fire-icon.svg" alt="flame" class="state-hidden" />
