@@ -3,13 +3,13 @@ export default async function handler(req, res) {
 
   const NOTION_KEY = process.env.NOTION_API_KEY;
   const GOOD_HABITS_ID = process.env.NOTION_GOOD_HABITS_ID;
-  const HABIT_NAME = "Gym";
+  const STREAK_DB_ID = process.env.NOTION_DATABASE_ID;
 
   if (!NOTION_KEY) return res.status(500).json({ error: "Missing NOTION_API_KEY" });
   if (!GOOD_HABITS_ID) return res.status(500).json({ error: "Missing NOTION_GOOD_HABITS_ID" });
 
   try {
-    const gymId = await getGymId(NOTION_KEY, process.env.NOTION_DATABASE_ID);
+    const gymId = await getGymId(NOTION_KEY, STREAK_DB_ID);
 
     let allResults = [];
     let cursor = undefined;
@@ -24,7 +24,6 @@ export default async function handler(req, res) {
         sorts: [{ property: "Date", direction: "descending" }],
         page_size: 100
       };
-
       if (cursor) body.start_cursor = cursor;
 
       const response = await fetch(`https://api.notion.com/v1/databases/${GOOD_HABITS_ID}/query`, {
@@ -43,8 +42,8 @@ export default async function handler(req, res) {
       cursor = data.next_cursor;
     }
 
-    const streak = calculateStreak(allResults);
-    res.status(200).json({ streak });
+    const result = calculateStreak(allResults);
+    res.status(200).json(result);
 
   } catch (err) {
     res.status(500).json({ error: err.message });
@@ -68,40 +67,89 @@ async function getGymId(notionKey, streakDbId) {
   return data.results[0].id;
 }
 
+function toDateStr(date) {
+  return date.toISOString().split("T")[0];
+}
+
+function isRestDay(dateStr) {
+  const day = new Date(dateStr + "T12:00:00").getDay();
+  // 0 = Sunday, 4 = Thursday, 6 = Saturday
+  return day === 0 || day === 4 || day === 6;
+}
+
 function calculateStreak(entries) {
-  const doneDates = entries
-    .filter(e => e.properties.Done?.checkbox === true)
-    .map(e => {
-      const raw = e.properties.Date?.date?.start;
-      return raw ? raw.split("T")[0] : null;
-    })
-    .filter(Boolean);
-
-  if (doneDates.length === 0) return 0;
-
-  const unique = [...new Set(doneDates)].sort((a, b) => b.localeCompare(a));
-
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  let streak = 0;
-  let expected = new Date(today);
-
-  const latestDate = new Date(unique[0]);
-  if (latestDate.getTime() < today.getTime()) {
-    expected = latestDate;
+  // Build a map of date -> { created: bool, done: bool }
+  const entryMap = {};
+  for (const e of entries) {
+    const raw = e.properties.Date?.date?.start;
+    if (!raw) continue;
+    const dateStr = raw.split("T")[0];
+    entryMap[dateStr] = {
+      created: true,
+      done: e.properties.Done?.checkbox === true
+    };
   }
 
-  for (const dateStr of unique) {
-    const date = new Date(dateStr);
-    const diff = Math.round((expected - date) / (1000 * 60 * 60 * 24));
-    if (diff === 0) {
-      streak++;
-      expected.setDate(expected.getDate() - 1);
+  // Determine today's status
+  const todayBR = new Date(new Date().toLocaleString("en-US", { timeZone: "America/Sao_Paulo" }));
+  const todayStr = toDateStr(todayBR);
+  const todayEntry = entryMap[todayStr];
+
+  // todayStatus: "done" | "pending" | "failed" | "rest"
+  let todayStatus;
+  if (isRestDay(todayStr)) {
+    if (!todayEntry) {
+      todayStatus = "rest"; // rest day, no entry = normal rest
+    } else if (todayEntry.done) {
+      todayStatus = "done"; // trained on rest day
     } else {
-      break;
+      todayStatus = "pending"; // created but not yet checked on rest day
+    }
+  } else {
+    if (!todayEntry) {
+      todayStatus = "pending"; // tasks not created yet today
+    } else if (todayEntry.done) {
+      todayStatus = "done";
+    } else {
+      todayStatus = "pending"; // created but not yet checked
     }
   }
 
-  return streak;
+  // Calculate streak going backwards from yesterday
+  // (today is handled separately via todayStatus)
+  let streak = 0;
+  const startDate = new Date(todayBR);
+  startDate.setDate(startDate.getDate() - 1); // start from yesterday
+
+  for (let i = 0; i < 365; i++) {
+    const dateStr = toDateStr(startDate);
+    const entry = entryMap[dateStr];
+    const restDay = isRestDay(dateStr);
+
+    if (restDay && !entry) {
+      // Rest day with no entry — skip, continue streak
+      startDate.setDate(startDate.getDate() - 1);
+      continue;
+    }
+
+    if (entry && entry.done) {
+      streak++;
+      startDate.setDate(startDate.getDate() - 1);
+      continue;
+    }
+
+    // entry exists but not done, or required day with no entry = streak broken
+    break;
+  }
+
+  // Add today to streak if done
+  if (todayStatus === "done") streak++;
+
+  // If today's streak is broken (non-rest day ended without check), reset
+  // This is handled client-side at midnight via todayStatus
+
+  return {
+    streak,
+    todayStatus // "done" | "pending" | "rest"
+  };
 }
